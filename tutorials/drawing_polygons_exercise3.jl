@@ -17,6 +17,9 @@ vertex_gray = Float32[0.2,                     # bottom-left
                       0.9,                     # bottom-right
                       0.5]                     # top-center
 
+# Specify how vertices are arranged into faces
+elements = Face{3,UInt32}[(0,1,2)]
+
 # The vertex shader---note the `vert` in front of """
 vertex_shader = vert"""
 #version 150
@@ -50,7 +53,8 @@ void main()
 # Link everything together, using the corresponding shader variable as
 # the Dict key
 bufferdict = Dict(:position=>GLBuffer(vertex_positions),
-                  :gray=>GLBuffer(vertex_gray))
+                  :gray=>GLBuffer(vertex_gray),
+                  :indexes=>indexbuffer(elements))
 
 ro = std_renderobject(bufferdict,
                       LazyShader(vertex_shader, fragment_shader))

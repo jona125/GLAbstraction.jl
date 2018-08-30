@@ -25,8 +25,8 @@ vertex_texcoords = Vec2f0[(0, 0),
                           (0, 1)]
 
 # Specify how vertices are arranged into faces
-elements = Face{3,UInt32,-1}[(0,1,2),          # the first triangle
-                             (2,3,0)]          # the second triangle
+elements = Face{3,UInt32}[(0,1,2),          # the first triangle
+                          (2,3,0)]          # the second triangle
 
 vertex_shader = vert"""
 #version 150
@@ -47,7 +47,26 @@ void main()
     gl_Position = trans*vec4(position, 0.0, 1.0);
 }
 """
-fragment_shader = load(joinpath(dirname(@__FILE__), "shaders", "puppykitten.frag"))
+
+fragment_shader = frag"""
+#version 150
+
+in vec3 Color;
+in vec2 Texcoord;
+
+out vec4 outColor;
+
+uniform sampler2D texKitten;
+uniform sampler2D texPuppy;
+
+void main()
+{
+    vec4 colKitten = texture(texKitten, Texcoord);
+    vec4 colPuppy = texture(texPuppy, Texcoord);
+    outColor = mix(colKitten, colPuppy, 0.5);
+}
+"""
+
 
 # Define the rotation matrix (could also use rotationmatrix_z)
 # By wrapping it in a Signal, we can easily update it.

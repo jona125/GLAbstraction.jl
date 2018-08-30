@@ -30,8 +30,8 @@ vertex_colors = Vec3f0[(1, 0, 0),                     # top-left
 # specifying faces in terms of julia's 1-based indexing, you should set
 # O=0. (If you instead number the vertices starting with 0, set
 # O=-1.)
-elements = Face{3,UInt32,-1}[(0,1,2),          # the first triangle
-                             (2,3,0)]          # the second triangle
+elements = Face{3,UInt32}[(0,1,2),          # the first triangle
+                          (2,3,0)]          # the second triangle
 
 # The vertex shader---note the `vert` in front of """
 vertex_shader = vert"""
