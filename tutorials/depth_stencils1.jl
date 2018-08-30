@@ -1,4 +1,5 @@
 using ModernGL, GeometryTypes, GLAbstraction, GLWindow, Images, FileIO
+import GLAbstraction: StandardPostrender
 
 # Load our textures. See "downloads.jl" to get the images.
 kitten = load(GLAbstraction.dir("tutorials", "images", "kitten.png"))
@@ -20,90 +21,84 @@ vertex_positions = Vec3f0[
     (-0.5f0, -0.5f0, -0.5f0),
     ( 0.5f0, -0.5f0, -0.5f0),
     ( 0.5f0,  0.5f0, -0.5f0),
-    ( 0.5f0,  0.5f0, -0.5f0),
     (-0.5f0,  0.5f0, -0.5f0),
-    (-0.5f0, -0.5f0, -0.5f0),
 
     (-0.5f0, -0.5f0,  0.5f0),
     ( 0.5f0, -0.5f0,  0.5f0),
     ( 0.5f0,  0.5f0,  0.5f0),
-    ( 0.5f0,  0.5f0,  0.5f0),
     (-0.5f0,  0.5f0,  0.5f0),
-    (-0.5f0, -0.5f0,  0.5f0),
 
     (-0.5f0,  0.5f0,  0.5f0),
     (-0.5f0,  0.5f0, -0.5f0),
     (-0.5f0, -0.5f0, -0.5f0),
-    (-0.5f0, -0.5f0, -0.5f0),
     (-0.5f0, -0.5f0,  0.5f0),
-    (-0.5f0,  0.5f0,  0.5f0),
 
     ( 0.5f0,  0.5f0,  0.5f0),
     ( 0.5f0,  0.5f0, -0.5f0),
     ( 0.5f0, -0.5f0, -0.5f0),
-    ( 0.5f0, -0.5f0, -0.5f0),
     ( 0.5f0, -0.5f0,  0.5f0),
-    ( 0.5f0,  0.5f0,  0.5f0),
 
     (-0.5f0, -0.5f0, -0.5f0),
     ( 0.5f0, -0.5f0, -0.5f0),
     ( 0.5f0, -0.5f0,  0.5f0),
-    ( 0.5f0, -0.5f0,  0.5f0),
     (-0.5f0, -0.5f0,  0.5f0),
-    (-0.5f0, -0.5f0, -0.5f0),
 
     (-0.5f0,  0.5f0, -0.5f0),
     ( 0.5f0,  0.5f0, -0.5f0),
     ( 0.5f0,  0.5f0,  0.5f0),
-    ( 0.5f0,  0.5f0,  0.5f0),
     (-0.5f0,  0.5f0,  0.5f0),
-    (-0.5f0,  0.5f0, -0.5f0),
 ]
 
 vertex_texcoords = Vec2f0[
                           (0.0f0, 0.0f0),
                           (1.0f0, 0.0f0),
                           (1.0f0, 1.0f0),
-                          (1.0f0, 1.0f0),
                           (0.0f0, 1.0f0),
-                          (0.0f0, 0.0f0),
 
                           (0.0f0, 0.0f0),
                           (1.0f0, 0.0f0),
                           (1.0f0, 1.0f0),
-                          (1.0f0, 1.0f0),
                           (0.0f0, 1.0f0),
-                          (0.0f0, 0.0f0),
 
                           (1.0f0, 0.0f0),
                           (1.0f0, 1.0f0),
                           (0.0f0, 1.0f0),
-                          (0.0f0, 1.0f0),
                           (0.0f0, 0.0f0),
-                          (1.0f0, 0.0f0),
 
                           (1.0f0, 0.0f0),
                           (1.0f0, 1.0f0),
                           (0.0f0, 1.0f0),
-                          (0.0f0, 1.0f0),
                           (0.0f0, 0.0f0),
-                          (1.0f0, 0.0f0),
 
                           (0.0f0, 1.0f0),
                           (1.0f0, 1.0f0),
                           (1.0f0, 0.0f0),
-                          (1.0f0, 0.0f0),
                           (0.0f0, 0.0f0),
-                          (0.0f0, 1.0f0),
 
                           (0.0f0, 1.0f0),
                           (1.0f0, 1.0f0),
                           (1.0f0, 0.0f0),
-                          (1.0f0, 0.0f0),
-                          (0.0f0, 0.0f0),
-                          (0.0f0, 1.0f0)]
+                          (0.0f0, 0.0f0)]
 
-vertex_colors = fill(Vec3f0(1,1,1), 36)
+vertex_colors = fill(Vec3f0(1,1,1), 24)
+
+elements = Face{3,UInt32}[( 0, 1, 2),
+                          ( 2, 3, 0),
+
+                          ( 4, 5, 6),
+                          ( 6, 7, 4),
+
+                          ( 8, 9,10),
+                          (10,11, 8),
+
+                          (12,13,14),
+                          (14,15,12),
+
+                          (16,17,18),
+                          (18,19,16),
+
+                          (20,21,22),
+                          (22,23,20)]
 
 vertex_shader = vert"""
 #version 150
@@ -126,7 +121,25 @@ void main()
     gl_Position = proj * view * model * vec4(position, 1.0);
 }
 """
-fragment_shader = load(joinpath(dirname(@__FILE__), "shaders", "puppykitten_color.frag"))
+
+fragment_shader = frag"""
+#version 150
+
+in vec3 Color;
+in vec2 Texcoord;
+
+out vec4 outColor;
+
+uniform sampler2D texKitten;
+uniform sampler2D texPuppy;
+
+void main()
+{
+    vec4 colKitten = texture(texKitten, Texcoord);
+    vec4 colPuppy = texture(texPuppy, Texcoord);
+    outColor = vec4(Color, 1.0) * mix(colKitten, colPuppy, 0.5);
+}
+"""
 
 model = eye(Mat{4,4,Float32})
 view = lookat(Vec3((1.2f0, 1.2f0, 1.2f0)), Vec3((0f0, 0f0, 0f0)), Vec3((0f0, 0f0, 1f0)))
@@ -141,7 +154,8 @@ bufferdict = Dict(:position=>GLBuffer(vertex_positions),
                   :texPuppy=>Texture(puppy'),
                   :model=>model,
                   :view=>view,
-                  :proj=>proj)
+                  :proj=>proj,
+                  :indexes=>indexbuffer(elements))
 
 ro = std_renderobject(bufferdict,
                       LazyShader(vertex_shader, fragment_shader))

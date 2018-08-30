@@ -27,8 +27,8 @@ vertex_texcoords = Vec2f0[(0, 0),
 # specifying faces in terms of julia's 1-based indexing, you should set
 # O=0. (If you instead number the vertices starting with 0, set
 # O=-1.)
-elements = Face{3,UInt32,-1}[(0,1,2),          # the first triangle
-                             (2,3,0)]          # the second triangle
+elements = Face{3,UInt32}[(0,1,2),          # the first triangle
+                          (2,3,0)]          # the second triangle
 
 # The vertex shader---note the `vert` in front of """
 vertex_shader = vert"""
@@ -72,7 +72,7 @@ void main()
 # the Dict key
 bufferdict = Dict(:position=>GLBuffer(vertex_positions),
                   :texcoord=>GLBuffer(vertex_texcoords),
-                  :tex=>Texture(data(img), x_repeat=:repeat),
+                  :tex=>Texture(img', x_repeat=:repeat),
                   :indexes=>indexbuffer(elements)) # special for element buffers
 
 ro = std_renderobject(bufferdict,

@@ -29,10 +29,10 @@ vertex_texcoords = Vec2f0[(0, 0),
 vertex_texcoords = vertex_texcoords[[1:4;4;3;2;1]]
 
 # Specify how vertices are arranged into faces
-elements = Face{3,UInt32,-1}[(0,1,2),
-                             (2,3,0),
-                             (4,5,6),
-                             (6,7,4)]
+elements = Face{3,UInt32}[(0,1,2),
+                          (2,3,0),
+                          (4,5,6),
+                          (6,7,4)]
 
 # The vertex shader---note the `vert` in front of """
 vertex_shader = vert"""
@@ -70,7 +70,7 @@ void main()
 # the Dict key
 bufferdict = Dict(:position=>GLBuffer(vertex_positions),
                   :texcoord=>GLBuffer(vertex_texcoords),
-                  :tex=>Texture(data(img)),
+                  :tex=>Texture(img'),
                   :indexes=>indexbuffer(elements)) # special for element buffers
 
 ro = std_renderobject(bufferdict,

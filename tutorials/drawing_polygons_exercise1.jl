@@ -8,9 +8,12 @@ vao = glGenVertexArrays()
 glBindVertexArray(vao)
 
 # The positions of the vertices in our rectangle
-vertex_positions = Point{2,Float32}[(-0.5,  0.5),     # top-left
-                                    ( 0.5,  0.5),     # top-right
-                                    ( 0.0, -0.5)]     # bottom-center
+vertex_positions = Point{2,Float32}[( 0.0,  0.5),     # top-left
+                                    ( 0.5, -0.5),     # top-right
+                                    (-0.5, -0.5)]     # bottom-center
+
+# Specify how vertices are arranged into faces
+elements = Face{3,UInt32}[(0,1,2)]
 
 # The vertex shader---note the `vert` in front of """
 vertex_shader = vert"""
@@ -20,7 +23,7 @@ in vec2 position;
 
 void main()
 {
-    gl_Position = vec4(position, 0.0, 1.0);
+    gl_Position = vec4(position.x, -position.y, 0.0, 1.0);
 }
 """
 
@@ -38,7 +41,8 @@ void main()
 
 # Link everything together, using the corresponding shader variable as
 # the Dict key
-bufferdict = Dict(:position=>GLBuffer(vertex_positions))
+bufferdict = Dict(:position=>GLBuffer(vertex_positions),
+                  :indexes=>indexbuffer(elements))
 
 ro = std_renderobject(bufferdict,
                       LazyShader(vertex_shader, fragment_shader))
